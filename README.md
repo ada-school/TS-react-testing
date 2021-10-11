@@ -78,11 +78,13 @@ describe("TaskItem", () => {
 });
 ```
 
+Esto creará una prueba de regresión usando snapshots del HTML que el componente renderiza
+
 > **Nota:** al crear snapshots, si el snapshot no existe se creará en la carpeta `snapshots`, si ya existe el contenido se comparará para hacer la prueba de regresión
 
 1. Corre las pruebas usando el comando `yarn test`, esto creara un snapshot nuevo
 1. Corre las pruebas de nuevo, esto comparará el snapshot presente con el resultado de renderizar el componente
-1. Ajusta el estilo del componente, por ejemplo cambia el valor de la propiedad `shadow` de `md` a `sm`
+1. Ajusta el estilo del componente, por ejemplo cambia el valor de la propiedad `shadow` de `sm` a `md`
 1. Corre las pruebas de nuevo, en este caso las pruebas fallarán porque el snapshot del componente ha cambiado, como es un cambio esperado presiona `w` en la consola donde estas corriendo las pruebas, y despues presiona `u`. Esto actualizara los snapshots a la nueva versión, felicitaciones haz hecho tu primera prueba de regresión para componentes de react
 
 ## Interacción con componentes y Mocks
@@ -94,7 +96,7 @@ import { screen, fireEvent } from "@testing-library/react";
 
 ...
 
-test("should call the 'onTaskChange' function with false if the task is checked", async () => {
+test("should call the 'onTaskChange' function if the task is checked", async () => {
     const mockOnTaskChanged = jest.fn();
     render(
       <TaskItem
