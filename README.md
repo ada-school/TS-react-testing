@@ -17,7 +17,7 @@ npm install
 ## Pruebas de Regresión: Snapshot testing
 
 1. A partir del código HTML que se usa para mostrar una tarea en la lista, crea un componente para poder reusar la funcionalidad y probarla
-1. Crea en la carpeta de `components` un nuevo archivo `TaskItem.tsx` con el siguiente contenido. Este será un componente que recibe una propiedad `task` de tipo `Task` y debe recibir otra una propiedad (callback) `onTaskSelected` que informe al componente padre cuando la tarea se haya checkeado.
+1. Crea en la carpeta de `components` un nuevo archivo `TaskItem.tsx` con el siguiente contenido. Este será un componente que recibe una propiedad `task` de tipo `Task` y debe recibir otra una propiedad (callback) `onTaskChange` que informe al componente padre cuando la tarea se haya checkeado.
 
 ```typescript
 import { Checkbox } from "@chakra-ui/checkbox";
