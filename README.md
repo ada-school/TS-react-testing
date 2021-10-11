@@ -51,6 +51,16 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, onTaskChange }) => {
 
 1. Remplaza en el archivo `App.tsx` el listado antiguo y usa el componente que acabas de crear
 
+```typescript
+import { TaskItem } from './components/TaskItem';
+
+...
+      {tasks.map((task, index) => (
+          <TaskItem key={index} task={task} onTaskChange={handleTaskChange} />
+        ))}
+...
+```
+
 1. En la carpeta de `components` crea un archivo para las pruebas del nuevo componente creado `TaskItem.test.tsx` con el siguiente contenido
 
 ```typescript
