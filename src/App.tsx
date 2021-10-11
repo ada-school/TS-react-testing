@@ -1,38 +1,79 @@
-import * as React from "react"
-import {
-  ChakraProvider,
-  Box,
-  Text,
-  Link,
-  VStack,
-  Code,
-  Grid,
-  theme,
-} from "@chakra-ui/react"
-import { ColorModeSwitcher } from "./ColorModeSwitcher"
-import { Logo } from "./Logo"
+import { Box, Button, Checkbox, Flex, Heading, Input } from "@chakra-ui/react";
+import React, { useState } from "react";
+import { Task } from "./models/Task";
 
-export const App = () => (
-  <ChakraProvider theme={theme}>
-    <Box textAlign="center" fontSize="xl">
-      <Grid minH="100vh" p={3}>
-        <ColorModeSwitcher justifySelf="flex-end" />
-        <VStack spacing={8}>
-          <Logo h="40vmin" pointerEvents="none" />
-          <Text>
-            Edit <Code fontSize="xl">src/App.tsx</Code> and save to reload.
-          </Text>
-          <Link
-            color="teal.500"
-            href="https://chakra-ui.com"
-            fontSize="2xl"
-            target="_blank"
-            rel="noopener noreferrer"
+const createTaskId = () => String(Math.floor(Math.random() * 1000));
+
+export const App = () => {
+  const [tasks, setTasks] = useState<Array<Task>>([]);
+  const [taskName, setTaskName] = useState("");
+
+  const handleTaskNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTaskName(e.target.value);
+  };
+
+  const handleAddTask = () => {
+    setTasks([
+      ...tasks,
+      { id: createTaskId(), name: taskName, isCompleted: false },
+    ]);
+    setTaskName("");
+  };
+
+  const handleTaskChange = (taskId: string, isCompleted: boolean) => {
+    setTasks(
+      tasks.map((task) => {
+        if (task.id === taskId) {
+          return { ...task, isCompleted };
+        }
+
+        return task;
+      })
+    );
+  };
+
+  return (
+    <Flex justify="center">
+      <Box w="800px">
+        <Heading as="h1" size="sm" my="6">
+          Create a Task
+        </Heading>
+        <Flex
+          rounded="md"
+          bg="white"
+          padding="6"
+          marginY="6"
+          gridGap="1rem"
+          shadow="md"
+        >
+          <Input
+            value={taskName}
+            onChange={handleTaskNameChange}
+            placeholder="Your task name"
+          />
+          <Button onClick={handleAddTask} colorScheme="purple">
+            Add Task
+          </Button>
+        </Flex>
+        <Flex as="ul" gridGap="1" direction="column"></Flex>
+        {tasks.map((task, index) => (
+          <Box
+            key={index}
+            rounded="md"
+            bg="white"
+            padding="6"
+            margin="1"
+            shadow="md"
           >
-            Learn Chakra
-          </Link>
-        </VStack>
-      </Grid>
-    </Box>
-  </ChakraProvider>
-)
+            <Checkbox
+              colorScheme="purple"
+              onChange={() => handleTaskChange(task.id, task.isCompleted)}
+            >
+              {task.name}
+            </Checkbox>
+          </Box>
+        ))}
+      </Box>
+    </Flex>
+  );
+};

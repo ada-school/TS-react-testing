@@ -1,59 +1,105 @@
-This project was bootstrapped with
-[Create React App](https://github.com/facebook/create-react-app).
+# Pruebas con React y TypeScript
 
-## Available Scripts
+# Laboratorio
 
-In the project directory, you can run:
+## Instalación
 
-### `yarn start`
+1. Clona este repositorio e instala las depedencias con yarn o npm
 
-Runs the app in the development mode.<br /> Open
-[http://localhost:3000](http://localhost:3000) to view it in the browser.
+```bash
+yarn install
+```
 
-The page will reload if you make edits.<br /> You will also see any lint errors
-in the console.
+```bash
+npm install
+```
 
-### `yarn test`
+## Pruebas de Regresión: Snapshot testing
 
-Launches the test runner in the interactive watch mode.<br /> See the section
-about
-[running tests](https://facebook.github.io/create-react-app/docs/running-tests)
-for more information.
+1. A partir del código HTML que se usa para mostrar una tarea en la lista, crea un componente para poder reusar la funcionalidad y probarla
+1. Crea en la carpeta de `components` un nuevo archivo `TaskItem.tsx` con el siguiente contenido. Este será un componente que recibe una propiedad `task` de tipo `Task` y debe recibir otra una propiedad (callback) `onTaskSelected` que informe al componente padre cuando la tarea se haya checkeado.
 
-### `yarn build`
+```typescript
+import { Checkbox } from "@chakra-ui/checkbox";
+import { Box } from "@chakra-ui/react";
+import React from "react";
+import { Task } from "../models/Task";
 
-Builds the app for production to the `build` folder.<br /> It correctly bundles
-React in production mode and optimizes the build for the best performance.
+interface TaskItemProps {
+  task: Task;
+  onTaskChange?: (taskId: string, isCompleted: boolean) => void;
+}
 
-The build is minified and the filenames include the hashes.<br /> Your app is
-ready to be deployed!
+export const TaskItem: React.FC<TaskItemProps> = ({ task, onTaskChange }) => {
+  const handleTaskChange = () => {
+    onTaskChange?.(task.id, !task.isCompleted);
+  };
 
-See the section about
-[deployment](https://facebook.github.io/create-react-app/docs/deployment) for
-more information.
+  return (
+    <Box rounded="md" bg="white" padding="6" margin="1" shadow="sm">
+      <Checkbox
+        onChange={handleTaskChange}
+        isChecked={task.isCompleted}
+        colorScheme="purple"
+      >
+        {task.name}
+      </Checkbox>
+    </Box>
+  );
+};
+```
 
-### `yarn eject`
+1. Remplaza en el archivo `App.tsx` el listado antiguo y usa el componente que acabas de crear
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+1. En la carpeta de `components` crea un archivo para las pruebas del nuevo componente creado `TaskItem.test.tsx` con el siguiente contenido
 
-If you aren’t satisfied with the build tool and configuration choices, you can
-`eject` at any time. This command will remove the single build dependency from
-your project.
+```typescript
+import { render } from "../test-utils";
+import { TaskItem } from "./TaskItem";
 
-Instead, it will copy all the configuration files and the transitive
-dependencies (webpack, Babel, ESLint, etc) right into your project so you have
-full control over them. All of the commands except `eject` will still work, but
-they will point to the copied scripts so you can tweak them. At this point
-you’re on your own.
+describe("TaskItem", () => {
+  test("should render correctly based on the provided props", () => {
+    const component = render(
+      <TaskItem task={{ id: "test-id", completed: false, name: "Test name" }} />
+    );
 
-You don’t have to ever use `eject`. The curated feature set is suitable for
-small and middle deployments, and you shouldn’t feel obligated to use this
-feature. However we understand that this tool wouldn’t be useful if you couldn’t
-customize it when you are ready for it.
+    expect(component).toMatchSnapshot();
+  });
+});
+```
 
-## Learn More
+> **Nota:** al crear snapshots, si el snapshot no existe se creará en la carpeta `snapshots`, si ya existe el contenido se comparará para hacer la prueba de regresión
 
-You can learn more in the
-[Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+1. Corre las pruebas usando el comando `yarn test`, esto creara un snapshot nuevo
+1. Corre las pruebas de nuevo, esto comparará el snapshot presente con el resultado de renderizar el componente
+1. Ajusta el estilo del componente, por ejemplo cambia el valor de la propiedad `shadow` de `md` a `sm`
+1. Corre las pruebas de nuevo, en este caso las pruebas fallarán porque el snapshot del componente ha cambiado, como es un cambio esperado presiona `w` en la consola donde estas corriendo las pruebas, y despues presiona `u`. Esto actualizara los snapshots a la nueva versión, felicitaciones haz hecho tu primera prueba de regresión para componentes de react
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Interacción con componentes y Mocks
+
+1. Ahora probaremos que al dar click al componente la función `onTaskChange` es llamada, para esto crea una nueva prueba en el archivo `TaskItem.test.tsx` con el siguiente contenido:
+
+```typescript
+import { screen, fireEvent } from "@testing-library/react";
+
+...
+
+test("should call the 'onTaskChange' function with false if the task is checked", async () => {
+    const mockOnTaskChanged = jest.fn();
+    render(
+      <TaskItem
+        task={{ id: "test-id", isCompleted: false, name: "Test name" }}
+        onTaskChange={mockOnTaskChanged}
+      />
+    );
+
+    const checkbox = await screen.findByText("Test name");
+    fireEvent.click(checkbox);
+
+    expect(mockOnTaskChanged).toHaveBeenCalled();
+  });
+```
+
+> **Nota 1:** `jest.fn()` se usa para crear una funcion mock, que despues se puede usar para saber si fue llamada o no
+
+> **Nota 2:** Para poder hacer click en componentes o usar el teclado debemos importar la libreria `fireEvent`
